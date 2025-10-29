@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Donor — LifeLink</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff;
+  --card:#f8fafc;
+  --text:#0f1720;
+  --muted:#6b7280;
+  --accent:#d90429;
+  --danger:#d90429;
+}
+[data-theme="dark"] {
+  --bg: #0f1720;
+  --card: #1e293b;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --accent: #d90429;
+  --danger: #f87171;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif}
+html,body{height:100%;background:var(--bg);color:var(--text);transition:background .35s ease,color .35s ease;overflow-x:hidden}
+
+/* header */
+header{position:fixed;left:0;right:0;top:0;height:72px;display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter: blur(6px);}
+.nav-wrap{width:100%;max-width:1200px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;gap:12px;align-items:center;cursor:pointer;}
+.logo-dot{width:12px;height:12px;border-radius:50%;background:var(--danger);box-shadow:0 4px 14px rgba(217,4,41,0.25);}
+.brand h1{font-size:1.3rem;color:var(--text);}
+.nav-actions{display:flex;align-items:center;gap:14px;}
+.cta-btn{background:var(--danger);color:#fff;padding:8px 14px;border-radius:999px;border:0;font-weight:600;box-shadow:0 6px 20px rgba(217,4,41,0.18);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+.cta-btn:active{transform:translateY(1px);}
+
+/* hamburger */
+.hambtn{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;border:0;background:transparent;cursor:pointer;position:relative;z-index:110}
+.ham-inner{width:26px;height:20px;position:relative}
+.ham-inner span{position:absolute;left:0;right:0;height:3px;background:var(--text);border-radius:4px;transition:all .35s cubic-bezier(.2,.9,.26,1)}
+.ham-inner span:nth-child(1){top:0}
+.ham-inner span:nth-child(2){top:8px}
+.ham-inner span:nth-child(3){top:16px}
+.hambtn.open .ham-inner span:nth-child(1){transform:translateY(8px) rotate(45deg);}
+.hambtn.open .ham-inner span:nth-child(2){opacity:0;}
+.hambtn.open .ham-inner span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
+
+/* full-screen nav overlay */
+.overlay{position:fixed;inset:0;background:linear-gradient(135deg, rgba(15,23,32,0.94), rgba(10,14,18,0.98));transform:translateX(100%);transition:transform .45s cubic-bezier(.2,.9,.26,1);z-index:80;display:flex;align-items:center;justify-content:center}
+.overlay.open{transform:translateX(0)}
+.overlay-inner{width:100%;max-width:640px;padding:48px;background:transparent;display:flex;flex-direction:column;gap:26px}
+.overlay nav{display:flex;flex-direction:column;gap:18px;margin-top:10px}
+.overlay a{color:#fff;text-decoration:none;font-size:24px;font-weight:600;padding:12px 18px;border-radius:12px;transition:background .18s}
+.overlay a:hover{background:rgba(255,255,255,0.04)}
+.overlay .small-links{margin-top:18px;display:flex;gap:12px}
+
+/* main content */
+.wrap{max-width:1100px;margin:96px auto 20px;padding:20px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.header h2{font-weight:700}
+.grid{display:grid;grid-template-columns:320px 1fr;gap:18px}
+.card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 20px rgba(9,10,13,0.04)}
+.profile{display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center}
+.avatar{width:92px;height:92px;border-radius:999px;background:linear-gradient(180deg,#ffecec,#ffd7d7);display:flex;align-items:center;justify-content:center;font-weight:700;color:#900;font-size:1.8rem}
+.toggle{margin-top:12px;margin-bottom:16px}
+.switch{width:56px;height:30px;background:#e6e6e6;border-radius:999px;position:relative;cursor:pointer}
+.knob{width:26px;height:26px;border-radius:50%;background:white;position:absolute;top:2px;left:2px;transition:left .22s}
+.switch.on{background:linear-gradient(90deg,#34d399,#10b981)}
+.switch.on .knob{left:28px}
+form .row{display:flex;gap:10px;margin-bottom:10px}
+input,select{padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);width:100%}
+.btn{background:var(--accent);color:white;padding:10px;border-radius:10px;border:0;cursor:pointer}
+#logoutBtn{margin-top:16px;width:100%}
+
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+@media (max-width:640px){header{height:64px}.nav-wrap{padding:0 14px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <div class="brand" onclick="scrollToTop()">
+      <div class="logo-dot"></div>
+      <h1>LifeLink</h1>
+    </div>
+    <div class="nav-actions">
+      <button id="themeBtn" class="cta-btn" title="Toggle theme">🌙</button>
+      <button class="hambtn" id="hambtn">
+        <div class="ham-inner">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div id="overlay" class="overlay">
+  <div class="overlay-inner">
+    <nav>
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="about.html" class="nav-link">About</a>
+      <a href="contact.html" class="nav-link">Contact</a>
+      <a href="auth.html" class="nav-link">Login / Register</a>
+    </nav>
+    <div class="small-links">
+      <button class="cta-btn" onclick="location.href='auth.html'">Get Started</button>
+      <button class="cta-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.12);" onclick="location.href='donor.html'">Donate Now</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="header">
+    <h2>Donor Dashboard</h2>
+  </div>
+
+  <div class="grid">
+    <!-- Profile Card -->
+    <div class="card">
+      <div class="profile">
+        <div class="avatar" id="avatar">NG</div>
+        <div style="font-weight:600" id="profileName">Name: </div>
+        <div style="color:var(--muted)" id="profileEmail">Email: </div>
+        <div class="toggle">
+          <div class="switch" id="availability">
+            <div class="knob"></div>
+          </div>
+          <div style="font-size:.9rem;color:var(--muted);margin-top:8px">Toggle to mark yourself available for donation</div>
+        </div>
+        <button class="btn" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+
+    <!-- Update Profile Form -->
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <h3 style="margin-bottom:8px">Update Profile</h3>
+        <form id="donorForm">
+          <div class="row"><input id="name" placeholder="Full name" required></div>
+          <div class="row"><select id="blood"><option>O+</option><option>A+</option><option>B+</option><option>AB+</option></select></div>
+          <div class="row"><input id="phone" placeholder="Phone number"></div>
+          <div class="row"><input id="location" placeholder="Location"></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn" type="submit">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Smooth scroll
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
+
+// Theme toggle
+const themeBtn = document.getElementById('themeBtn');
+const currentTheme = localStorage.getItem('lifelink-theme') || 'light';
+if(currentTheme==='dark') document.documentElement.setAttribute('data-theme','dark');
+updateThemeBtn();
+
+themeBtn.addEventListener('click', ()=>{
+  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+  if(isDark){ document.documentElement.removeAttribute('data-theme'); localStorage.setItem('lifelink-theme','light'); }
+  else { document.documentElement.setAttribute('data-theme','dark'); localStorage.setItem('lifelink-theme','dark'); }
+  updateThemeBtn();
+});
+function updateThemeBtn(){ themeBtn.textContent = document.documentElement.getAttribute('data-theme')==='dark'?'☀️':'🌙'; }
+
+// Overlay nav
+const hambtn = document.getElementById('hambtn');
+const overlay = document.getElementById('overlay');
+const navLinks = document.querySelectorAll('.nav-link');
+
+function openOverlay(){ hambtn.classList.add('open'); overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+function closeOverlay(){ hambtn.classList.remove('open'); overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
+hambtn.addEventListener('click', ()=>{ overlay.classList.contains('open')?closeOverlay():openOverlay(); });
+navLinks.forEach(a=>a.addEventListener('click', ()=>{ closeOverlay(); }));
+overlay.addEventListener('click', e=>{ if(e.target===overlay) closeOverlay(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeOverlay(); });
+
+// Donor data load
+document.addEventListener('DOMContentLoaded', ()=>{
+  let donorData = JSON.parse(localStorage.getItem('donorData'));
+  if(!donorData){ alert('Please login first'); window.location.href='auth.html'; return; }
+
+  // Avatar & profile
+  document.getElementById('avatar').textContent = donorData.name.split(' ').map(n=>n[0]).join('');
+  document.getElementById('profileName').textContent = `Name: ${donorData.name}`;
+  document.getElementById('profileEmail').textContent = `Email: ${donorData.email}`;
+
+  // Prefill form
+  document.getElementById('name').value = donorData.name;
+  if(donorData.blood) document.getElementById('blood').value = donorData.blood;
+  if(donorData.phone) document.getElementById('phone').value = donorData.phone;
+  if(donorData.location) document.getElementById('location').value = donorData.location;
+
+  // Availability toggle
+  const switchEl = document.getElementById('availability');
+  let available = donorData.available || false;
+  if(available) switchEl.classList.add('on');
+  switchEl.addEventListener('click', ()=>{
+    available = !available;
+    switchEl.classList.toggle('on', available);
+    donorData.available = available;
+    localStorage.setItem('donorData', JSON.stringify(donorData));
+  });
+
+  // Update profile
+  document.getElementById('donorForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    donorData.name = document.getElementById('name').value;
+    donorData.blood = document.getElementById('blood').value;
+    donorData.phone = document.getElementById('phone').value;
+    donorData.location = document.getElementById('location').value;
+    localStorage.setItem('donorData', JSON.stringify(donorData));
+
+    document.getElementById('profileName').textContent = `Name: ${donorData.name}`;
+    document.getElementById('avatar').textContent = donorData.name.split(' ').map(n=>n[0]).join('');
+    alert('Profile updated successfully!');
+  });
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', ()=>{
+    localStorage.removeItem('donorData');
+    window.location.href='auth.html';
+  });
+});
+</script>
+<script src="js/main.js"></script>
+</body>
+</html>

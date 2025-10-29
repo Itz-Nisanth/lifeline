@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Urgent Blood Request</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+
+    :root{
+      --bg:#f6f7f9;
+      --card:#ffffff;
+      --text:#1f2430;
+      --muted:#6b7280;
+      --danger:#d90429;
+      --accent: rgba(217,4,41,0.08);
+      --glass: rgba(255,255,255,0.6);
+    }
+    [data-theme="dark"]{
+      --bg:#0f1720;
+      --card:#111827;
+      --text:#e6eef8;
+      --muted:#9aa6b2;
+      --glass: rgba(255,255,255,0.03);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif}
+    html,body{height:100%}
+    body{background:var(--bg);color:var(--text);transition:background .35s ease,color .35s ease;overflow-x:hidden}
+
+    /* header */
+  header{position:fixed;left:0;right:0;top:0;height:72px;display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter: blur(6px)}
+    .nav-wrap{width:100%;max-width:1200px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;}
+    .brand{display:flex;gap:12px;align-items:center;cursor:pointer}
+    .logo-dot{width:12px;height:12px;border-radius:50%;background:var(--danger);box-shadow:0 4px 14px rgba(217,4,41,0.25)}
+    .brand h1{font-size:1.1rem;color:var(--text);letter-spacing:0.2px}
+    .nav-actions{display:flex;align-items:center;gap:14px}
+
+    .cta-btn{background:var(--danger);color:#fff;padding:8px 14px;border-radius:999px;border:0;font-weight:600;box-shadow:0 6px 20px rgba(217,4,41,0.18);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+    .cta-btn:active{transform:translateY(1px)}
+
+    /* hamburger */
+  .hambtn{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;border:0;background:transparent;cursor:pointer;position:relative;z-index:110}
+    .ham-inner{width:26px;height:20px;position:relative}
+    .ham-inner span{position:absolute;left:0;right:0;height:3px;background:var(--text);border-radius:4px;transition:all .35s cubic-bezier(.2,.9,.26,1)}
+    .ham-inner span:nth-child(1){top:0}
+    .ham-inner span:nth-child(2){top:8px}
+    .ham-inner span:nth-child(3){top:16px}
+    .hambtn.open .ham-inner span:nth-child(1){transform:translateY(8px) rotate(45deg);}
+    .hambtn.open .ham-inner span:nth-child(2){opacity:0}
+    .hambtn.open .ham-inner span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
+
+    /* full-screen nav overlay */
+    .overlay{position:fixed;inset:0;background:linear-gradient(135deg, rgba(15,23,32,0.94), rgba(10,14,18,0.98));transform:translateX(100%);transition:transform .45s cubic-bezier(.2,.9,.26,1);z-index:80;display:flex;align-items:center;justify-content:center}
+    .overlay.open{transform:translateX(0)}
+    .overlay-inner{width:100%;max-width:640px;padding:48px;background:transparent;display:flex;flex-direction:column;gap:26px}
+    .overlay nav{display:flex;flex-direction:column;gap:18px;margin-top:10px}
+    .overlay a{color:#fff;text-decoration:none;font-size:24px;font-weight:600;padding:12px 18px;border-radius:12px;transition:background .18s}
+    .overlay a:hover{background:rgba(255,255,255,0.04)}
+    .overlay .small-links{margin-top:18px;display:flex;gap:12px}
+
+    
+
+    @media (max-width:640px){
+      header{height:64px}
+      .nav-wrap{padding:0 14px;}
+      .brand h1{font-size:1rem}
+
+      .overlay-inner{padding:28px}
+      .overlay a{font-size:20px}
+    }
+
+    /* subtle entrance */
+    .fade-up{opacity:0;transform:translateY(8px);animation:fadeUp .7s forwards}
+    .fade-up.delay{animation-delay:.12s}
+    @keyframes fadeUp{to{opacity:1;transform:none}}
+
+
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      padding: 30px;
+      animation: fadeIn 0.8s ease-in;
+    }
+
+    h1 {
+      text-align: center;
+      color: #c82333;
+      margin-bottom: 25px;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      flex: 1 1 calc(50% - 10px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #c82333;
+      box-shadow: 0 0 5px rgba(200,35,51,0.5);
+    }
+
+    textarea {
+      resize: none;
+    }
+
+    button {
+      flex: 1 1 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #c82333;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #a71d2a;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(200,35,51,0.3);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover {
+      background-color: #f9f9f9;
+      transform: scale(1.01);
+    }
+
+    .fade-in {
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      0% {opacity: 0; transform: translateY(-10px);}
+      100% {opacity: 1; transform: translateY(0);}
+    }
+
+    @media(max-width: 700px){
+      .form-group {
+        flex: 1 1 100%;
+      }
+    }
+
+    td.actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .delete-btn, .share-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      transition: 0.3s;
+    }
+
+    .delete-btn {
+      background-color: #888;
+      color: #fff;
+    }
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+
+    .share-btn {
+      background-color: #4caf50;
+      color: #fff;
+    }
+    .share-btn:hover {
+      background-color: #388e3c;
+    }
+
+    /* center the urgent form on the page (below fixed header) */
+    .urgent-wrap{min-height:calc(100vh - 72px);display:flex;align-items:center;justify-content:center;padding:72px 16px 32px}
+    @media(max-width:700px){
+      .urgent-wrap{min-height:calc(100vh - 64px);padding-top:64px}
+    }
+
+  </style>
+</head>
+<body>
+
+    <header>
+    <div class="nav-wrap">
+      <div class="brand" onclick="scrollToTop()">
+        <div class="logo-dot" aria-hidden></div>
+        <h1 style="color: rgb(129, 192, 129);font-size:1.3rem;">LifeLink</h1>
+      </div>
+
+  <div class="nav-actions">
+        <button id="themeBtn" class="cta-btn" aria-pressed="false" title="Toggle theme">🌙</button>
+        <button class="hambtn" id="hambtn" aria-label="Open menu">
+          <div class="ham-inner">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <div class="overlay-inner">
+      
+      <nav>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="auth.html" class="nav-link">Login / Register</a>
+      </nav>
+      <div class="small-links">
+        <button class="cta-btn" onclick="location.href='auth.html'">Get Started</button>
+        <button class="cta-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.12);" onclick="location.href='donor.html'">Donate Now</button>
+      </div>
+    </div>
+  </div>
+
+<main class="urgent-wrap">
+  <div class="container">
+  <h1>Urgent Blood Request</h1>
+
+  <form id="urgentForm">
+    <div class="form-group">
+      <label for="bloodGroup">Blood Group</label>
+      <select id="bloodGroup" required>
+        <option value="">Select Blood Group</option>
+        <option value="A+">A+</option>
+        <option value="A-">A-</option>
+        <option value="B+">B+</option>
+        <option value="B-">B-</option>
+        <option value="AB+">AB+</option>
+        <option value="AB-">AB-</option>
+        <option value="O+">O+</option>
+        <option value="O-">O-</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="units">Number of Units</label>
+      <input type="number" id="units" placeholder="Units" min="1" required>
+    </div>
+
+    <div class="form-group">
+      <label for="contact">Contact Number</label>
+      <input type="text" id="contact" placeholder="Enter your number" required>
+    </div>
+
+    <div class="form-group">
+      <label for="message">Message (Optional)</label>
+      <textarea id="message" rows="2" placeholder="Additional info"></textarea>
+    </div>
+
+    <button type="submit">Submit & Share</button>
+  </form>
+
+  <table id="requestTable">
+    <thead>
+      <tr>
+        <th>Blood Group</th>
+        <th>Units</th>
+        <th>Contact</th>
+        <th>Message</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Requests will appear here -->
+    </tbody>
+  </table>
+  </div>
+</main>
+
+<script>
+  const form = document.getElementById('urgentForm');
+  const tableBody = document.getElementById('requestTable').querySelector('tbody');
+
+  // Load existing requests from localStorage
+  let requests = JSON.parse(localStorage.getItem('urgentRequests')) || [];
+
+  function saveRequests() {
+    localStorage.setItem('urgentRequests', JSON.stringify(requests));
+  }
+
+  function renderRequests() {
+    tableBody.innerHTML = '';
+    requests.forEach((req, index) => {
+      const row = document.createElement('tr');
+      row.classList.add('fade-in');
+      row.innerHTML = `
+        <td>${req.bloodGroup}</td>
+        <td>${req.units}</td>
+        <td>${req.contact}</td>
+        <td>${req.message}</td>
+        <td class="actions">
+          <button class="delete-btn" onclick="deleteRequest(${index})">Delete</button>
+          <button class="share-btn" onclick="shareWhatsApp('${req.bloodGroup}','${req.units}','${req.contact}','${req.message}')">Share</button>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
+
+  function deleteRequest(index) {
+    requests.splice(index, 1);
+    saveRequests();
+    renderRequests();
+  }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const bloodGroup = document.getElementById('bloodGroup').value;
+    const units = document.getElementById('units').value;
+    const contact = document.getElementById('contact').value;
+    const message = document.getElementById('message').value || "Urgent blood required!";
+
+    const newRequest = { bloodGroup, units, contact, message };
+    requests.unshift(newRequest); // newest first
+    saveRequests();
+    renderRequests();
+
+    form.reset();
+  });
+
+  function shareWhatsApp(bloodGroup, units, contact, message) {
+    const text = `URGENT: Need ${units} unit(s) of ${bloodGroup} blood. Contact: ${contact}. ${message}`;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  }
+
+  // Initial render
+  renderRequests();
+</script>
+
+<script src="./js/main.js"></script>
+
+</body>
+</html>

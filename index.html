@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>LifeLink — Emergency Blood Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+ <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --text:#1f2430; --muted:#6b7280; --danger:#d90429; --glass: rgba(255,255,255,0.6);
+}
+[data-theme="dark"]{
+  --bg:#0f1720; --card:#111827; --text:#e6eef8; --muted:#9aa6b2; --glass: rgba(255,255,255,0.03);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);overflow-x:hidden;position:relative;transition: background 0.3s ease, color 0.3s ease;}
+
+/* Glittering background circles */
+.glitter-bg{position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:-1;}
+.glow-circle{position:absolute; border-radius:50%; background:radial-gradient(circle, rgba(217,4,41,0.4) 0%, rgba(217,4,41,0) 70%); filter: blur(20px); animation: floatGlow 12s ease-in-out infinite alternate, shimmer 3s ease-in-out infinite;}
+@keyframes floatGlow{0%{transform:translate(0,0);}50%{transform:translate(40px,-40px);}100%{transform:translate(0,0);}}
+@keyframes shimmer{0%,100%{opacity:0.5;}50%{opacity:1;}}
+
+/* Header */
+header{position:fixed;left:0;right:0;top:0;height:72px;display:flex;align-items:center;justify-content:center;z-index:10050;backdrop-filter: blur(6px);}
+.nav-wrap{width:100%;max-width:1200px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;gap:12px;align-items:center;cursor:pointer}
+.logo-dot{width:12px;height:12px;border-radius:50%;background:var(--danger);box-shadow:0 4px 14px rgba(217,4,41,0.25);}
+  .brand h1{font-size:1.3rem;color:var(--text);letter-spacing:0.2px}
+.nav-actions{display:flex;align-items:center;gap:14px}
+.cta-btn{background:var(--danger);color:#fff;padding:8px 14px;border-radius:999px;border:0;font-weight:600;box-shadow:0 6px 20px rgba(217,4,41,0.18);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;}
+.cta-btn:active{transform:translateY(1px);}
+
+/* Hamburger */
+.hambtn{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;border:0;background:transparent;cursor:pointer;position:relative;z-index:10150}
+.ham-inner{width:26px;height:20px;position:relative}
+.ham-inner span{position:absolute;left:0;right:0;height:3px;background:var(--text);border-radius:4px;transition:all .35s cubic-bezier(.2,.9,.26,1)}
+.ham-inner span:nth-child(1){top:0}
+.ham-inner span:nth-child(2){top:8px}
+.ham-inner span:nth-child(3){top:16px}
+.hambtn.open .ham-inner span:nth-child(1){transform:translateY(8px) rotate(45deg);}
+.hambtn.open .ham-inner span:nth-child(2){opacity:0;}
+.hambtn.open .ham-inner span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
+
+/* Full-screen nav overlay */
+.overlay{position:fixed;inset:0;background:linear-gradient(135deg, rgba(15,23,32,0.94), rgba(10,14,18,0.98));transform:translateX(100%);transition:transform .45s cubic-bezier(.2,.9,.26,1);z-index:10000;display:flex;align-items:center;justify-content:center}
+.overlay.open{transform:translateX(0)}
+.overlay-inner{width:100%;max-width:640px;padding:48px;background:transparent;display:flex;flex-direction:column;gap:26px}
+.overlay nav{display:flex;flex-direction:column;gap:18px;margin-top:10px}
+.overlay a{color:#fff;text-decoration:none;font-size:24px;font-weight:600;padding:12px 18px;border-radius:12px;transition:background .18s}
+.overlay a:hover{background:rgba(255,255,255,0.04)}
+.small-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
+
+/* Glow animation for Get Started button only */
+@keyframes glowEffect{0%,100%{box-shadow:0 0 8px rgba(217,4,41,0.6);}50%{box-shadow:0 0 20px rgba(217,4,41,1);}}
+.cta-btn.glow{animation: glowEffect 1.5s infinite alternate;}
+
+/* Hero Section */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 20px 80px}
+.hero-inner{width:100%;max-width:1200px;display:grid;grid-template-columns:1fr 480px;gap:36px;align-items:center}
+.hero-left{padding:18px}
+.headline{font-size:clamp(1.6rem,3.5vw,2.6rem);line-height:1.02;margin-bottom:12px;font-weight:700}
+.sub{color:var(--muted);font-size:1rem;margin-bottom:18px}
+.roles{display:grid;grid-template-columns:repeat(1,1fr);gap:14px}
+.role-card{background:var(--card);border-radius:14px;padding:18px;border:1px solid rgba(0,0,0,0.04);display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:transform .28s,box-shadow .28s;}
+.role-card:hover{transform:translateY(-8px);box-shadow:0 12px 30px rgba(6,8,15,0.08);}
+.role-card h3{color:var(--danger);font-size:1.05rem;}
+.role-card p{color:var(--muted);font-size:.95rem;}
+.headline, .role-card, .donor {
+  opacity: 0;
+  transform: translateY(14px) scale(0.995);
+  will-change: opacity, transform;
+}
+
+@keyframes entranceUp {
+  from { opacity: 0; transform: translateY(14px) scale(0.995); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.in-view { animation: entranceUp 420ms cubic-bezier(.2,.9,.26,1) both; }
+
+.stagger-1 { animation-delay: 80ms; }
+.stagger-2 { animation-delay: 180ms; }
+.stagger-3 { animation-delay: 300ms; }
+.hero-right{display:flex;align-items:center;justify-content:center;position:relative}
+
+.alert-box{width:100%;max-width:420px;background:var(--card);border-radius:18px;padding:22px;box-shadow:0 12px 40px rgba(6,8,15,0.08);display:flex;flex-direction:column;gap:16px;overflow:hidden;position:relative;}
+.alert-header{font-weight:700;color:var(--danger);font-size:1.2rem;text-align:center;}
+.alert-message{background:rgba(217,4,41,0.05);border-left:4px solid var(--danger);padding:12px 16px;border-radius:8px;opacity:0;position:relative;animation: slideIn 0.6s ease forwards;}
+@keyframes slideIn{0%{transform:translateX(100%);opacity:0;}100%{transform:translateX(0);opacity:1;}}
+
+/* Glow pulse around alert */
+@keyframes pulseGlow{0%{box-shadow:0 0 10px rgba(217,4,41,0.5);}50%{box-shadow:0 0 20px rgba(217,4,41,0.8);}100%{box-shadow:0 0 10px rgba(217,4,41,0.5);}}
+.alert-box::before{content:"";position:absolute;inset:0;border-radius:18px;animation:pulseGlow 1.5s infinite;pointer-events:none;}
+
+/* Notification Bell */
+.bell{position:absolute;top:-14px;right:-14px;width:28px;height:28px;background:var(--danger);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;animation:bellBounce 1s infinite;}
+@keyframes bellBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+
+/* Blood Compatibility Chart */
+.chart-wrap{margin-top:60px;max-width:920px;padding:20px;margin-left:auto;margin-right:auto;}
+.chart-wrap h2{color:var(--danger);margin-bottom:12px;}
+.chart{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 20px rgba(9,10,13,0.04);border:1px solid rgba(0,0,0,0.06)}
+.donor-list, .rec-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+.donor, .recipient{min-width:70px;padding:10px;border-radius:10px;background:var(--glass);border:1px solid rgba(0,0,0,0.04);display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:all .2s ease}
+.donor.selected, .recipient.highlight{background:linear-gradient(180deg, rgba(217,4,41,0.25), rgba(217,4,41,0.05));box-shadow:0 8px 26px rgba(217,4,41,0.08)}
+.donor .type, .recipient .type{font-weight:700;color:var(--danger)}
+.recipient .rh{font-size:.8rem;color:var(--muted)}
+
+/* Hospital Map */
+  .hospital-section{max-width:980px;margin:50px auto;padding:20px;background:var(--card);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.06)}
+  .hospital-section h2{color:var(--danger);margin-bottom:12px;text-align:center}
+  .hospital-list{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+  .hospital-card{flex:1 1 200px;background:var(--card);padding:12px 16px;border-radius:8px;cursor:pointer;border:1px solid rgba(0,0,0,0.06);text-align:center;transition:0.3s;}
+  .hospital-card:hover{background:rgba(217,4,41,0.06);}
+#hospitalMap{width:100%;height:400px;border-radius:12px;border:1px solid #ccc;}
+    #map {
+      height: 500px;
+      width: 100%;
+      max-width: 900px;
+      border-radius: 15px;
+      margin-top: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: var(--danger);
+    }
+    #locateBtn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--danger);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+    #locateBtn:hover {
+      filter:brightness(.9);
+    }
+/* Footer */
+footer{text-align:center;padding:12px;background:var(--card);margin-top:20px;border-top:1px solid rgba(0,0,0,0.06);color:var(--muted)}
+
+/* Responsive */
+@media(max-width:980px){.hero-inner{grid-template-columns:1fr;}.hero-right{order:-1;margin-bottom:18px;}.roles{grid-template-columns:repeat(2,1fr);}.chart{grid-template-columns:1fr;}.donor,.recipient{min-width:48%;}}
+@media(max-width:640px){header{height:64px}.nav-wrap{padding:0 14px}.brand h1{font-size:1rem}.roles{grid-template-columns:1fr}.hero{padding:100px 14px 70px}.overlay-inner{padding:28px}.overlay a{font-size:20px}}
+</style>
+</head>
+<body>
+
+<div class="glitter-bg">
+  <div class="glow-circle" style="top:10%; left:15%; width:80px; height:80px;"></div>
+  <div class="glow-circle" style="top:30%; left:70%; width:120px; height:120px;"></div>
+  <div class="glow-circle" style="top:60%; left:25%; width:60px; height:60px;"></div>
+  <div class="glow-circle" style="top:75%; left:80%; width:90px; height:90px;"></div>
+</div>
+
+<header>
+<div class="nav-wrap">
+  <div class="brand" onclick="scrollToTop()">
+    <div class="logo-dot" aria-hidden></div>
+    <h1>LifeLink</h1>
+  </div>
+  <div class="nav-actions">
+    <button id="themeBtn" class="cta-btn">🌙</button>
+    <button class="hambtn" id="hambtn">
+      <div class="ham-inner"><span></span><span></span><span></span></div>
+    </button>
+  </div>
+</div>
+</header>
+
+<!-- Hamburger Overlay -->
+<div id="overlay" class="overlay">
+  <div class="overlay-inner">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="auth.html">Login / Register</a>
+    </nav>
+    <div class="small-links">
+      <button class="cta-btn glow" onclick="location.href='auth.html'">Get Started</button>
+      <button class="cta-btn" onclick="location.href='donor.html'">Donate Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hero Section -->
+<main class="hero">
+<div class="hero-inner">
+  <div class="hero-left">
+    <div class="headline">Find or Donate Blood in Seconds — <span style="color:var(--danger)">Every Second Matters</span></div>
+    <p class="sub">LifeLink connects hospitals, blood banks and nearby registered donors with fast, real-time matching. Built for emergencies — designed for simplicity.</p>
+
+    <div class="roles" style="margin-top:18px">
+      <div class="role-card" onclick="location.href='hospital.html'">
+        <h3>Hospital</h3>
+        <p>Raise urgent requests, track responses and see nearest blood bank availability instantly.</p>
+      </div>
+      <div class="role-card" onclick="location.href='donor.html'">
+        <h3>Donor</h3>
+        <p>Register, set availability and receive instant SMS/email alerts when your blood type is needed nearby.</p>
+      </div>
+      <div class="role-card" onclick="location.href='urgent.html'">
+            <h3>Urgent Blood</h3>
+            <p>Ask on wb, and post it on social media and let the nearby hospital contact you.</p>
+          </div>
+    </div>
+  </div>
+
+  <!-- Hero Right: Animated Emergency Alert -->
+  <div class="hero-right">
+    <div class="alert-box">
+      <div class="bell">🔔</div>
+      <div class="alert-header">Emergency Alerts</div>
+      <div class="alert-message" id="alertMessage">Urgent: A+ blood needed at City Hospital!</div>
+    </div>
+  </div>
+</div>
+</main>
+
+<!-- Blood Compatibility Chart -->
+<section class="chart-wrap">
+  <h2>Blood Compatibility Chart</h2>
+  <div class="chart">
+    <div class="card">
+      <div>Click a donor to see compatible recipients:</div>
+      <div class="donor-list" id="donorList"></div>
+    </div>
+    <div class="card">
+      <div>Recipients:</div>
+      <div class="rec-grid" id="recGrid">
+        <div class="recipient" data-type="O-"><div class="type">O-</div><div class="rh">O negative</div></div>
+        <div class="recipient" data-type="O+"><div class="type">O+</div><div class="rh">O positive</div></div>
+        <div class="recipient" data-type="A-"><div class="type">A-</div><div class="rh">A negative</div></div>
+        <div class="recipient" data-type="A+"><div class="type">A+</div><div class="rh">A positive</div></div>
+        <div class="recipient" data-type="B-"><div class="type">B-</div><div class="rh">B negative</div></div>
+        <div class="recipient" data-type="B+"><div class="type">B+</div><div class="rh">B positive</div></div>
+        <div class="recipient" data-type="AB-"><div class="type">AB-</div><div class="rh">AB negative</div></div>
+        <div class="recipient" data-type="AB+"><div class="type">AB+</div><div class="rh">AB positive</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hospital-section">
+  <h2>Hospitals Near Me</h2>
+  <div class="hospital-controls" style="display:flex;gap:12px;justify-content:center;align-items:center;margin-bottom:12px;">
+    <button id="locateBtn" class="cta-btn">Show Hospitals Near Me</button>
+   
+  </div>
+
+  <div id="map"></div>
+
+  <iframe id="hospitalMap" title="Hospital embed" src="" style="width:100%;height:380px;margin-top:16px;border-radius:12px;border:1px solid #ccc;display:none;"></iframe>
+</section>
+
+<footer>© 2025 LifeLink • Saving lives, one drop at a time</footer>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map').setView([20.5937, 78.9629], 5); // default view: India
+
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  // Function to locate user and show nearby hospitals
+  function locateHospitals() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+
+          // hide any hospital embed
+          const hospitalMapEl = document.getElementById('hospitalMap');
+          if(hospitalMapEl){ hospitalMapEl.style.display='none'; hospitalMapEl.src=''; }
+
+          // Center map to user's location
+          map.setView([lat, lng], 14);
+
+          // Add marker for user's location
+          L.marker([lat, lng]).addTo(map)
+            .bindPopup('You are here')
+            .openPopup();
+
+          // Use Overpass API to find hospitals nearby
+          const radius = 5000; // 5 km
+          const overpassUrl = `
+            https://overpass-api.de/api/interpreter?data=[out:json];
+            node(around:${radius},${lat},${lng})["amenity"="hospital"];
+            out;
+          `;
+          
+          fetch(overpassUrl)
+            .then(res => res.json())
+            .then(data => {
+              // remove previous hospital markers (simple approach: clear all layers then re-add base tiles)
+              map.eachLayer(layer => { if(layer instanceof L.Marker) map.removeLayer(layer); });
+
+              data.elements.forEach(hospital => {
+                const hLat = hospital.lat;
+                const hLng = hospital.lon;
+                const name = hospital.tags.name || "Hospital";
+
+                L.marker([hLat, hLng], {icon: L.icon({
+                  iconUrl: 'https://cdn-icons-png.flaticon.com/512/854/854878.png',
+                  iconSize: [25, 25],
+                })})
+                  .addTo(map)
+                  .bindPopup(name);
+              });
+            })
+            .catch(err => {
+              console.error('Error fetching hospitals:', err);
+              alert('Could not fetch nearby hospitals.');
+            });
+        },
+        (err) => {
+          console.error(err);
+          alert('Location access denied.');
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by your browser.');
+    }
+  }
+
+  document.getElementById('locateBtn').addEventListener('click', locateHospitals);
+</script>
+<script>
+// Hamburger toggle
+const hambtn=document.getElementById('hambtn');
+const overlay=document.getElementById('overlay');
+hambtn.addEventListener('click',()=>{hambtn.classList.toggle('open');overlay.classList.toggle('open');});
+
+// Theme toggle
+const themeBtn=document.getElementById('themeBtn');
+themeBtn.addEventListener('click',()=>{if(document.documentElement.getAttribute('data-theme')==='dark'){document.documentElement.removeAttribute('data-theme');themeBtn.textContent='🌙';} else {document.documentElement.setAttribute('data-theme','dark');themeBtn.textContent='☀️';}});
+
+function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+
+// Blood Compatibility
+const compat={"O-":["O-","O+","A-","A+","B-","B+","AB-","AB+"],"O+": ["O+","A+","B+","AB+"],"A-":["A-","A+","AB-","AB+"],"A+": ["A+","AB+"],"B-":["B-","B+","AB-","AB+"],"B+": ["B+","AB+"],"AB-":["AB-","AB+"],"AB+": ["AB+"]};
+const reverseCompat={}; Object.entries(compat).forEach(([d,r])=>r.forEach(rec=>{if(!reverseCompat[rec])reverseCompat[rec]=[];reverseCompat[rec].push(d);}));
+const donors=["O-","O+","A-","A+","B-","B+","AB-","AB+"];
+const donorListEl=document.getElementById('donorList');
+const recGrid=document.getElementById('recGrid');
+let selectedDonor=null,selectedRecipient=null;
+
+donors.forEach(type=>{const d=document.createElement('button');d.type='button';d.className='donor';d.setAttribute('aria-pressed','false');d.setAttribute('data-type',type);d.innerHTML=`<div class="type">${type}</div><div class="small">donor</div>`;d.addEventListener('click',()=>selectDonor(type,d));donorListEl.appendChild(d);});
+Array.from(recGrid.children).forEach(rec=>{const type=rec.dataset.type;rec.addEventListener('click',()=>selectRecipient(type,rec));});
+function selectDonor(type,el){if(selectedDonor===type){clearAllSelections(); return;}selectedDonor=type; selectedRecipient=null;Array.from(donorListEl.children).forEach(btn=>{const is=btn.dataset.type===type;btn.classList.toggle('selected',is);btn.setAttribute('aria-pressed',is?'true':'false');});const targets=compat[type]||[];Array.from(recGrid.children).forEach(cell=>cell.classList.toggle('highlight',targets.includes(cell.dataset.type)));}
+function selectRecipient(type,el){if(selectedRecipient===type){clearAllSelections(); return;}selectedRecipient=type; selectedDonor=null;Array.from(recGrid.children).forEach(cell=>cell.classList.toggle('highlight',cell.dataset.type===type));const donors=reverseCompat[type]||[];Array.from(donorListEl.children).forEach(btn=>{const is=donors.includes(btn.dataset.type);btn.classList.toggle('selected',is);btn.setAttribute('aria-pressed',is?'true':'false');});}
+function clearAllSelections(){selectedDonor=null; selectedRecipient=null;Array.from(donorListEl.children).forEach(btn=>{btn.classList.remove('selected'); btn.setAttribute('aria-pressed','false');});Array.from(recGrid.children).forEach(cell=>cell.classList.remove('highlight'));}
+
+// Hospital Map
+const hospitals = {"City Hospital":"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.518635021062!2d77.5946!3d12.9716!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1670d9a0a7ef%3A0x1e33f8e5b6ebf3ee!2sCity%20Hospital!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin","LifeCare Hospital":"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.123456789012!2d77.6245!3d12.9352!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1670d9a0b7cd%3A0xabcdef1234567890!2sLifeCare%20Hospital!5e0!3m2!1sen!2sin!4v1700000000001!5m2!1sen!2sin","Sunrise Hospital":"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3887.987654321098!2d77.6105!3d12.9141!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1670d9a0c7df%3A0x123456abcdef7890!2sSunrise%20Hospital!5e0!3m2!1sen!2sin!4v1700000000002!5m2!1sen!2sin"};
+function showHospital(name){
+  const el = document.getElementById("hospitalMap");
+  el.src = hospitals[name];
+  el.style.display = 'block';
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+// Animated emergency alerts
+const messages = [
+  "Urgent: A+ blood needed at City Hospital!",
+  "Emergency: O- blood required at LifeCare Hospital!",
+  "Alert: B+ blood required at Sunrise Hospital!"
+];
+let alertIndex = 0;
+const alertEl = document.getElementById('alertMessage');
+
+setInterval(() => {
+  alertEl.style.opacity = 0;
+  setTimeout(() => {
+    alertEl.textContent = messages[alertIndex];
+    alertEl.style.opacity = 1;
+    alertIndex = (alertIndex + 1) % messages.length;
+  }, 600);
+}, 4000);
+
+</script>
+<!-- Entrance animations: stagger headline, role-cards and donors -->
+<script>
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // headline
+    const headline = document.querySelector('.headline');
+    if(headline){ headline.classList.add('in-view','stagger-1'); }
+
+    // role cards
+    const roles = Array.from(document.querySelectorAll('.role-card'));
+    roles.forEach((el,i)=>{
+      const cls = ['in-view', i===0? 'stagger-1' : i===1? 'stagger-2' : 'stagger-3'];
+      setTimeout(()=> el.classList.add(...cls), 80 + i*90);
+    });
+
+    // donor buttons (if present)
+    const donors = Array.from(document.querySelectorAll('.donor'));
+    donors.forEach((d,i)=>{ setTimeout(()=> d.classList.add('in-view','stagger-2'), 360 + i*50); });
+  });
+</script>
+</body>
+</html>

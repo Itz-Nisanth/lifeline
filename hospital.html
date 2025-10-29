@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hospital Dashboard — LifeLink</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+    --bg:#f9fafb;
+    --card:#fff;
+    --text:#0f1720;
+    --accent:#d90429;
+    --muted:#6b7280;
+}
+[data-theme="dark"] {
+    --bg:#0f1720;
+    --card:#1e293b;
+    --text:#f8fafc;
+    --accent:#d90429;
+    --muted:#94a3b8;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{background:var(--bg);color:var(--text);transition:background .3s,color .3s;}
+header{position:fixed;top:0;left:0;right:0;height:72px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);z-index:100;}
+.nav-wrap{width:100%;max-width:1200px;padding:0 20px;display:flex;justify-content:space-between;align-items:center;}
+.brand{display:flex;gap:12px;align-items:center;cursor:pointer;}
+.logo-dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 4px 14px rgba(217,4,41,0.25);}
+.nav-actions{display:flex;align-items:center;gap:12px;}
+.cta-btn{background:var(--accent);color:#fff;padding:8px 14px;border-radius:999px;border:0;font-weight:600;cursor:pointer;transition:.2s;}
+.cta-btn:hover{opacity:.9;}
+.wrap{max-width:1000px;margin:100px auto 50px;padding:20px;display:flex;flex-direction:column;gap:20px;}
+.card{background:var(--card);padding:24px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.05);transition:transform .2s, box-shadow .2s;}
+.card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,0.1);}
+h2{text-align:center;margin-bottom:16px;}
+form{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:flex-start;}
+form select, form input{padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);}
+form input[type=number]{width:120px;text-align:center;}
+button.add-btn{padding:10px 20px;background:linear-gradient(135deg,#d90429,#ff355e);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;box-shadow:0 6px 15px rgba(217,4,41,0.3);transition:.3s;}
+button.add-btn:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(217,4,41,0.4);}
+table{width:100%;border-collapse:collapse;margin-top:12px;}
+th,td{padding:10px;text-align:left;border-bottom:1px solid #ccc;vertical-align:middle;}
+th{background:rgba(217,4,41,0.05);}
+td input[type=number]{border:1px solid #ccc;border-radius:4px;text-align:center;transition:border .2s, box-shadow .2s;}
+td input[type=number]:focus{border-color:var(--accent);box-shadow:0 0 5px rgba(217,4,41,0.5);}
+button.action-btn{padding:4px 10px;border:none;border-radius:4px;cursor:pointer;transition:opacity .2s;}
+button.action-btn:hover{opacity:.8;}
+button.delete-btn{background:red;color:#fff;}
+button.edit-btn{background:var(--accent);color:#fff;}
+.badge{padding:4px 8px;border-radius:6px;color:#fff;font-weight:600;}
+.badge.O{background:#ff4b3e;}
+.badge.A{background:#ff7f50;}
+.badge.B{background:#ffb347;}
+.badge.AB{background:#6a5acd;}
+.fade-up{opacity:0;transform:translateY(8px);animation:fadeUp .6s forwards;}
+@keyframes fadeUp{to{opacity:1;transform:none;}}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 20px;border-radius:8px;opacity:0;transition:opacity .3s;}
+.highlight{animation:highlightAnim 0.6s;}
+@keyframes highlightAnim{0%{background-color:rgba(217,4,41,0.3);}100%{background-color:transparent;}}
+@media(max-width:768px){
+    .wrap{padding:10px;}
+    td input[type=number]{width:70px;}
+    form input[type=number]{width:90px;}
+    table th, table td{padding:6px;}
+    form{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <div class="brand" onclick="scrollToTop()">
+      <div class="logo-dot"></div>
+      <h1>LifeLink</h1>
+    </div>
+    <div class="nav-actions">
+      <button id="themeBtn" class="cta-btn">🌙</button>
+      <button id="logoutBtn" class="cta-btn">Logout</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="card fade-up">
+    <h2>Welcome, <span id="hospitalName"></span></h2>
+  </div>
+
+  <div class="card fade-up">
+    <h2>Add New Blood Pack</h2>
+    <form id="addPackForm">
+      <select id="bloodType" required>
+        <option value="">Select Blood Type</option>
+        <option value="O+">O+</option>
+        <option value="O-">O-</option>
+        <option value="A+">A+</option>
+        <option value="A-">A-</option>
+        <option value="B+">B+</option>
+        <option value="B-">B-</option>
+        <option value="AB+">AB+</option>
+        <option value="AB-">AB-</option>
+      </select>
+      <input type="number" id="bloodQty" placeholder="Quantity" min="1" required>
+      <button type="submit" class="add-btn">Add Blood Pack</button>
+    </form>
+  </div>
+
+  <div class="card fade-up">
+    <h2>Available Blood Packs</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Blood Type</th>
+          <th>Quantity</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="bloodTable"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// Smooth scroll
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
+
+// Theme toggle
+const themeBtn=document.getElementById('themeBtn');
+const currentTheme=localStorage.getItem('lifelink-theme')||'light';
+if(currentTheme==='dark') document.documentElement.setAttribute('data-theme','dark');
+updateThemeBtn();
+themeBtn.addEventListener('click',()=>{
+    const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+    if(isDark){document.documentElement.removeAttribute('data-theme');localStorage.setItem('lifelink-theme','light');}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('lifelink-theme','dark');}
+    updateThemeBtn();
+});
+function updateThemeBtn(){themeBtn.textContent=document.documentElement.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+
+// Toast notification
+function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg;
+    t.style.opacity='1';
+    setTimeout(()=>{t.style.opacity='0';},1500);
+}
+
+// Hospital auth check
+const hospitalData=JSON.parse(localStorage.getItem('hospitalData'));
+if(!hospitalData){ alert('Only hospitals can access this page'); window.location.href='auth.html'; }
+
+document.getElementById('hospitalName').textContent=hospitalData.name;
+
+// Load blood packs
+let bloodPacks=JSON.parse(localStorage.getItem('bloodPacks'))||[];
+const bloodTable=document.getElementById('bloodTable');
+
+function renderTable(){
+    bloodTable.innerHTML='';
+    bloodPacks.forEach((pack,index)=>{
+        const tr=document.createElement('tr');
+        const typeClass = pack.type.startsWith('O')?'O':pack.type.startsWith('A')?'A':pack.type.startsWith('B')?'B':'AB';
+        tr.innerHTML=`
+            <td><span class="badge ${typeClass}">${pack.type}</span></td>
+            <td>
+                ${hospitalData? `<input type="number" min="0" value="${pack.quantity}" onchange="updatePack(${index}, this)">` : pack.quantity}
+            </td>
+            <td>
+                ${hospitalData? `<button class="action-btn delete-btn" onclick="deletePack(${index}, this)">Delete</button>` : '—'}
+            </td>
+        `;
+        bloodTable.appendChild(tr);
+    });
+}
+
+window.updatePack=(index,inputEl)=>{
+    const qtyNum=parseInt(inputEl.value);
+    if(qtyNum>=0){
+        bloodPacks[index].quantity=qtyNum;
+        localStorage.setItem('bloodPacks',JSON.stringify(bloodPacks));
+        inputEl.closest('tr').classList.add('highlight');
+        setTimeout(()=>inputEl.closest('tr').classList.remove('highlight'),600);
+        showToast('Quantity updated');
+    }
+}
+
+window.deletePack=(index,btnEl)=>{
+    bloodPacks.splice(index,1);
+    localStorage.setItem('bloodPacks',JSON.stringify(bloodPacks));
+    btnEl.closest('tr').remove();
+    showToast('Blood pack deleted');
+}
+
+// Add new pack
+document.getElementById('addPackForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    const type=document.getElementById('bloodType').value;
+    const qty=parseInt(document.getElementById('bloodQty').value);
+    if(type && qty>0){
+        bloodPacks.push({type,quantity:qty});
+        localStorage.setItem('bloodPacks',JSON.stringify(bloodPacks));
+        renderTable();
+        document.getElementById('bloodType').value='';
+        document.getElementById('bloodQty').value='';
+        showToast('Blood pack added');
+    }
+});
+
+renderTable();
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click',()=>{
+    localStorage.removeItem('hospitalData');
+    window.location.href='auth.html';
+});
+</script>
+
+</body>
+</html>

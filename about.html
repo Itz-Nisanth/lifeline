@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LifeLink — Emergency Blood Network</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f6f7f9;
+      --card:#ffffff;
+      --text:#1f2430;
+      --muted:#6b7280;
+      --danger:#d90429;
+      --accent: rgba(217,4,41,0.08);
+      --glass: rgba(255,255,255,0.6);
+    }
+    [data-theme="dark"]{
+      --bg:#0f1720;
+      --card:#111827;
+      --text:#e6eef8;
+      --muted:#9aa6b2;
+      --glass: rgba(255,255,255,0.03);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif}
+    html,body{height:100%}
+    body{background:var(--bg);color:var(--text);transition:background .35s ease,color .35s ease;overflow-x:hidden}
+
+    /* header */
+  header{position:fixed;left:0;right:0;top:0;height:72px;display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter: blur(6px)}
+    .nav-wrap{width:100%;max-width:1200px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;}
+    .brand{display:flex;gap:12px;align-items:center;cursor:pointer}
+    .logo-dot{width:12px;height:12px;border-radius:50%;background:var(--danger);box-shadow:0 4px 14px rgba(217,4,41,0.25)}
+    .brand h1{font-size:1.1rem;color:var(--text);letter-spacing:0.2px}
+    .nav-actions{display:flex;align-items:center;gap:14px}
+
+    .cta-btn{background:var(--danger);color:#fff;padding:8px 14px;border-radius:999px;border:0;font-weight:600;box-shadow:0 6px 20px rgba(217,4,41,0.18);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+    .cta-btn:active{transform:translateY(1px)}
+
+    /* hamburger */
+  .hambtn{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;border:0;background:transparent;cursor:pointer;position:relative;z-index:110}
+    .ham-inner{width:26px;height:20px;position:relative}
+    .ham-inner span{position:absolute;left:0;right:0;height:3px;background:var(--text);border-radius:4px;transition:all .35s cubic-bezier(.2,.9,.26,1)}
+    .ham-inner span:nth-child(1){top:0}
+    .ham-inner span:nth-child(2){top:8px}
+    .ham-inner span:nth-child(3){top:16px}
+    .hambtn.open .ham-inner span:nth-child(1){transform:translateY(8px) rotate(45deg);}
+    .hambtn.open .ham-inner span:nth-child(2){opacity:0}
+    .hambtn.open .ham-inner span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
+
+    /* full-screen nav overlay */
+    .overlay{position:fixed;inset:0;background:linear-gradient(135deg, rgba(15,23,32,0.94), rgba(10,14,18,0.98));transform:translateX(100%);transition:transform .45s cubic-bezier(.2,.9,.26,1);z-index:80;display:flex;align-items:center;justify-content:center}
+    .overlay.open{transform:translateX(0)}
+    .overlay-inner{width:100%;max-width:640px;padding:48px;background:transparent;display:flex;flex-direction:column;gap:26px}
+    .overlay nav{display:flex;flex-direction:column;gap:18px;margin-top:10px}
+    .overlay a{color:#fff;text-decoration:none;font-size:24px;font-weight:600;padding:12px 18px;border-radius:12px;transition:background .18s}
+    .overlay a:hover{background:rgba(255,255,255,0.04)}
+    .overlay .small-links{margin-top:18px;display:flex;gap:12px}
+
+    
+
+    @media (max-width:640px){
+      header{height:64px}
+      .nav-wrap{padding:0 14px;}
+      .brand h1{font-size:1rem}
+
+      .overlay-inner{padding:28px}
+      .overlay a{font-size:20px}
+    }
+
+    /* subtle entrance */
+    .fade-up{opacity:0;transform:translateY(8px);animation:fadeUp .7s forwards}
+    .fade-up.delay{animation-delay:.12s}
+    @keyframes fadeUp{to{opacity:1;transform:none}}
+
+
+          /* Hero Section */
+    .hero {
+      position: relative;
+      background: url('https://images.unsplash.com/photo-1588776814546-115d9ce43242?auto=format&fit=crop&w=1470&q=80') center/cover no-repeat;
+      color: #fff;
+      padding: 6rem 2rem 4rem;
+      text-align: center;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position:absolute;
+      top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.5);
+      z-index:1;
+    }
+    .hero-content { position: relative; z-index:2; }
+    .hero h1 { font-size:3rem; color: #fff; margin-bottom:1rem; }
+    .hero p { font-size:1.2rem; color: #f1f1f1; }
+
+    .container { max-width:1200px; margin:auto; padding:2rem; }
+
+    .lifelink-section { background-color: var(--card); padding:2rem; border-radius:16px; margin-bottom:2rem; box-shadow:0 6px 15px rgba(0,0,0,0.05); display:flex; flex-wrap:wrap; align-items:center; gap:2rem; }
+    .lifelink-section img { max-width:350px; border-radius:12px; flex:1; }
+    .lifelink-section-content { flex:2; }
+
+    .lifelink-section-content h2 { color: var(--danger); margin-bottom:1rem; }
+    .lifelink-section-content p { margin-bottom:1rem; }
+
+    .lifelink-features { display:grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap:1.5rem; margin-top:2rem; }
+    .lifelink-feature { background-color: var(--accent); padding:1.5rem; border-radius:12px; text-align:center; transition: transform 0.3s; position:relative; overflow:hidden; }
+    .lifelink-feature img { width:60px; margin-bottom:1rem; }
+    .lifelink-feature h3 { color: var(--danger); margin-bottom:0.5rem; }
+    .lifelink-feature p { color: var(--text); }
+
+    .lifelink-feature:hover { transform: scale(1.05); background-color: rgba(217,4,41,0.12); }
+
+    .lifelink-cta { text-align:center; margin-top:2rem; }
+    .lifelink-cta button { background-color: var(--danger); color:#fff; padding:0.75rem 2rem; border:none; border-radius:50px; font-size:1rem; cursor:pointer; transition:0.3s; }
+    .lifelink-cta button:hover { background-color:#b80020; transform:scale(1.05); }
+
+    /* Fade-up animation */
+    .fade-up { opacity:0; transform:translateY(8px); animation:fadeUp 0.7s forwards; }
+    .fade-up.delay { animation-delay:.12s; }
+    @keyframes fadeUp { to { opacity:1; transform:none; } }
+
+    @media(max-width:768px) {
+      .lifelink-section { flex-direction:column; }
+      .lifelink-section img { max-width:100%; }
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-wrap">
+      <div class="brand" onclick="scrollToTop()">
+        <div class="logo-dot" aria-hidden></div>
+        <h1 style="color: rgb(129, 192, 129);font-size:1.3rem;">LifeLink</h1>
+      </div>
+
+  <div class="nav-actions">
+        <button id="themeBtn" class="cta-btn" aria-pressed="false" title="Toggle theme">🌙</button>
+        <button class="hambtn" id="hambtn" aria-label="Open menu">
+          <div class="ham-inner">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <div class="overlay-inner">
+      
+      <nav>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="auth.html" class="nav-link">Login / Register</a>
+      </nav>
+      <div class="small-links">
+        <button class="cta-btn" onclick="location.href='auth.html'">Get Started</button>
+        <button class="cta-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.12);" onclick="location.href='donor.html'">Donate Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero fade-up">
+            <img src="./assets/mn-donor-removebg-preview.png" alt="banar"  width="500px">
+    <div class="hero-content">
+      <h1>LifeLink</h1>
+      <p>Emergency Blood Supply Network Connecting Donors, Hospitals, and Patients in Real-Time</p>
+    </div>
+  </section>
+
+  <div class="container">
+
+    <!-- Mission Section -->
+    <div class="lifelink-section fade-up">
+      <img src="./assets/handshake.jpg" alt="Mission Image">
+      <div class="lifelink-section-content">
+        <h2>Our Mission</h2>
+        <p>LifeLink is a revolutionary platform designed to save lives by addressing the critical challenges of blood donation and emergency blood supply. Every second counts, and LifeLink ensures that compatible blood is located and delivered swiftly.</p>
+        <p>Our goal is to reduce the effort and time required to locate compatible blood so that no patient suffers due to unavailability.</p>
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="lifelink-section fade-up delay" style="flex-direction:column;">
+      <h2>Key Features</h2>
+      <div class="lifelink-features">
+        <div class="lifelink-feature fade-up delay">
+          <img src="https://img.icons8.com/?size=100&id=114504&format=png&color=000000"/>
+          <h3>Real-Time Inventory</h3>
+          <p>Monitor blood availability across multiple blood banks instantly.</p>
+        </div>
+        <div class="lifelink-feature fade-up delay">
+          <img src="https://img.icons8.com/color/96/000000/alarm.png"/>
+          <h3>Emergency Requests</h3>
+          <p>Send instant blood requests with location-based matching to nearby donors.</p>
+        </div>
+        <div class="lifelink-feature fade-up delay">
+          <img src="https://img.icons8.com/?size=100&id=61242&format=png&color=000000"/>
+          <h3>Donor Management</h3>
+          <p>Maintain up-to-date donor health records and availability status.</p>
+        </div>
+        <div class="lifelink-feature fade-up delay">
+          <img src="https://img.icons8.com/color/96/000000/notification.png"/>
+          <h3>Automated Notifications</h3>
+          <p>Notify compatible donors via SMS and email during emergencies.</p>
+        </div>
+        <div class="lifelink-feature fade-up delay">
+          <img src="https://img.icons8.com/color/96/000000/event-accepted.png"/>
+          <h3>Blood Drive Scheduling</h3>
+          <p>Plan and manage community blood donation events efficiently.</p>
+        </div>
+        <div class="lifelink-feature fade-up delay">
+          <img src="https://img.icons8.com/color/96/000000/combo-chart.png"/>
+          <h3>Analytics Dashboard</h3>
+          <p>Gain insights into donation trends and identify shortages.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Who We Serve Section -->
+    <div class="lifelink-section fade-up">
+      <img src="./assets/doc.jpg" alt="Who We Serve">
+      <div class="lifelink-section-content">
+        <h2>Who We Serve</h2>
+        <p><strong>Hospitals & Clinics:</strong> Quick access to compatible blood supplies.</p>
+        <p><strong>Blood Banks:</strong> Efficient inventory and donor management.</p>
+        <p><strong>Registered Donors:</strong> Save lives in emergencies.</p>
+        <p><strong>NGOs & Organizations:</strong> Organize impactful blood donation events.</p>
+      </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="lifelink-cta fade-up delay">
+      <button onclick="location.href='auth.html'">Join LifeLink & Save Lives</button>
+    </div>
+
+  </div>
+
+
+  <script src="js/main.js"></script>
+</body>
+</html>
+
+
+
